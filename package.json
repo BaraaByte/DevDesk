@@ -1,0 +1,10 @@
+{
+  "name": "devdesk",
+  "version": "1.0.0",
+  "description": "DevDesk - Programmer's Desktop Dashboard",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}

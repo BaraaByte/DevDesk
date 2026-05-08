@@ -1,48 +1,58 @@
-"""Configuration for DevDesk Backend"""
+"""Configuration management for DevDesk Backend"""
 import os
-from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class Config:
     """Base configuration"""
-    # Database
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///devdesk.db'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
-    # Flask
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-    DEBUG = False
-    TESTING = False
-    
-    # CORS
-    CORS_ORIGINS = ["http://localhost:5173", "http://localhost:3000"]
-    
-    # API
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
+    
+    # CORS settings
+    CORS_ORIGINS = ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174']
+    
+    # API settings
+    API_VERSION = '1.0.0'
+    API_NAME = 'DevDesk API'
+
 
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
     TESTING = False
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///devdesk_dev.db'
+    FLASK_ENV = 'development'
 
-class TestingConfig(Config):
-    """Testing configuration"""
-    TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
     TESTING = False
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    if not SECRET_KEY:
-        raise ValueError("SECRET_KEY environment variable must be set in production")
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL',
+        'sqlite:///devdesk.db'
+    )
+    FLASK_ENV = 'production'
 
-def get_config():
-    """Get config based on environment"""
-    env = os.getenv('FLASK_ENV', 'development')
-    config_map = {
-        'development': DevelopmentConfig,
-        'testing': TestingConfig,
-        'production': ProductionConfig,
-    }
-    return config_map.get(env, DevelopmentConfig)
+
+class TestingConfig(Config):
+    """Testing configuration"""
+    DEBUG = True
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    FLASK_ENV = 'testing'
+
+
+# Configuration selector
+CONFIG_MAP = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+}
+
+# Get active configuration
+ENV = os.getenv('FLASK_ENV', 'development')
+config = CONFIG_MAP.get(ENV, DevelopmentConfig)

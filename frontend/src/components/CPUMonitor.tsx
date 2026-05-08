@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import styled from '@emotion/styled'
 import { useSystemStore } from '../store/systemStore'
 
@@ -62,30 +62,21 @@ interface CPUMonitorProps {
 
 export default function CPUMonitor({ isDark }: CPUMonitorProps) {
   const stats = useSystemStore((state) => state.stats)
-  const updateStats = useSystemStore((state) => state.updateStats)
-  const [animatedCPU, setAnimatedCPU] = useState(stats?.cpu || 0)
+  const fetchStats = useSystemStore((state) => state.fetchStats)
 
-  // Simulate CPU updates
+  // Fetch real stats on mount and periodically
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newCPU = Math.floor(Math.random() * 80) + 10
-      setAnimatedCPU(newCPU)
-      updateStats({
-        cpu: newCPU,
-        ram: stats?.ram || 0,
-        ram_total: stats?.ram_total || 16,
-        timestamp: new Date().toISOString(),
-      })
-    }, 2000)
+    fetchStats()
+    const interval = setInterval(fetchStats, 2000)
     return () => clearInterval(interval)
-  }, [stats, updateStats])
+  }, [fetchStats])
 
-  const cpuPercentage = animatedCPU || 0
+  const cpuPercentage = stats?.cpu || 0
 
   return (
     <Container isDark={isDark}>
       <Label>CPU Usage</Label>
-      <Value>{cpuPercentage}%</Value>
+      <Value>{cpuPercentage.toFixed(1)}%</Value>
       <ProgressBar isDark={isDark}>
         <ProgressFill percentage={cpuPercentage} />
       </ProgressBar>

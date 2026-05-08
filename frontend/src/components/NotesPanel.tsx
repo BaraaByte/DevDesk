@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styled from '@emotion/styled'
 import { useSystemStore } from '../store/systemStore'
 
@@ -140,15 +140,25 @@ interface NotesPanelProps {
 
 export default function NotesPanel({ isDark }: NotesPanelProps) {
   const notes = useSystemStore((state) => state.notes)
-  const addNote = useSystemStore((state) => state.addNote)
-  const removeNote = useSystemStore((state) => state.removeNote)
+  const fetchNotes = useSystemStore((state) => state.fetchNotes)
+  const saveNote = useSystemStore((state) => state.saveNote)
+  const deleteNote = useSystemStore((state) => state.deleteNote)
   const [input, setInput] = useState('')
 
-  const handleAdd = () => {
+  // Fetch notes on mount
+  useEffect(() => {
+    fetchNotes()
+  }, [fetchNotes])
+
+  const handleAdd = async () => {
     if (input.trim()) {
-      addNote(input.trim())
+      await saveNote(input.trim())
       setInput('')
     }
+  }
+
+  const handleDelete = async (id: string) => {
+    await deleteNote(id)
   }
 
   return (
@@ -172,7 +182,7 @@ export default function NotesPanel({ isDark }: NotesPanelProps) {
           {notes.map((note) => (
             <NoteItem key={note.id} isDark={isDark}>
               <NoteText>{note.text}</NoteText>
-              <DeleteButton onClick={() => removeNote(note.id)}>✕</DeleteButton>
+              <DeleteButton onClick={() => handleDelete(note.id)}>✕</DeleteButton>
             </NoteItem>
           ))}
         </NotesList>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import styled from '@emotion/styled'
 import { useSystemStore } from '../store/systemStore'
 
@@ -62,31 +62,24 @@ interface RAMMonitorProps {
 
 export default function RAMMonitor({ isDark }: RAMMonitorProps) {
   const stats = useSystemStore((state) => state.stats)
-  const updateStats = useSystemStore((state) => state.updateStats)
-  const [animatedRam, setAnimatedRam] = useState(stats?.ram || 2)
+  const fetchStats = useSystemStore((state) => state.fetchStats)
 
-  // Simulate RAM updates
+  // Fetch real stats on mount and periodically
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newRam = Math.floor(Math.random() * 8) + 2
-      setAnimatedRam(newRam)
-      updateStats({
-        cpu: stats?.cpu || 0,
-        ram: newRam,
-        ram_total: 16,
-        timestamp: new Date().toISOString(),
-      })
-    }, 2500)
+    fetchStats()
+    const interval = setInterval(fetchStats, 2500)
     return () => clearInterval(interval)
-  }, [stats, updateStats])
+  }, [fetchStats])
 
-  const ramPercentage = (animatedRam / 16) * 100
+  const ramUsed = stats?.ram || 0
+  const ramTotal = stats?.ram_total || 16
+  const ramPercentage = (ramUsed / ramTotal) * 100
 
   return (
     <Container isDark={isDark}>
       <Label>RAM Usage</Label>
-      <Value>{animatedRam} GB</Value>
-      <Details>of 16 GB ({ramPercentage.toFixed(1)}%)</Details>
+      <Value>{ramUsed.toFixed(1)} GB</Value>
+      <Details>of {ramTotal.toFixed(1)} GB ({ramPercentage.toFixed(1)}%)</Details>
       <ProgressBar isDark={isDark}>
         <ProgressFill percentage={ramPercentage} />
       </ProgressBar>

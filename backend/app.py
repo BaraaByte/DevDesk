@@ -1,58 +1,49 @@
-"""Main Flask application for DevDesk Backend"""
+"""DevDesk Backend - Modern Flask API"""
 import os
-from flask import Flask, jsonify
+from flask import Flask
 from flask_cors import CORS
-from config import get_config
+from config import config, CONFIG_MAP
 from models import db
-from routes import api_bp
+from routes import register_routes
 
-def create_app(config=None):
-    """Application factory"""
-    app = Flask(__name__)
+
+def create_app(config_name=None):
+    """
+    Application factory
     
-    # Load configuration
-    if config is None:
-        config = get_config()
-    app.config.from_object(config)
+    Args:
+        config_name: Configuration name (development, production, testing)
+                    If None, uses FLASK_ENV environment variable
+    
+    Returns:
+        Flask app instance
+    """
+    if config_name is None:
+        config_name = os.getenv('FLASK_ENV', 'development')
+    
+    app_config = CONFIG_MAP.get(config_name, CONFIG_MAP['development'])
+    
+    # Create Flask app
+    app = Flask(__name__)
+    app.config.from_object(app_config)
     
     # Initialize extensions
     db.init_app(app)
-    CORS(app, origins=app.config['CORS_ORIGINS'])
     
-    # Register blueprints
-    app.register_blueprint(api_bp)
+    # Setup CORS
+    CORS(app, origins=app.config['CORS_ORIGINS'])
     
     # Create database tables
     with app.app_context():
         db.create_all()
     
-    # Error handlers
-    @app.errorhandler(404)
-    def not_found(error):
-        return jsonify({'error': 'Not found'}), 404
-    
-    @app.errorhandler(500)
-    def server_error(error):
-        return jsonify({'error': 'Internal server error'}), 500
-    
-    # Root endpoint
-    @app.route('/', methods=['GET'])
-    def root():
-        return jsonify({
-            'name': 'DevDesk API',
-            'version': '1.0.0',
-            'status': 'running',
-            'endpoints': {
-                'health': '/api/health',
-                'current_stats': '/api/stats/current',
-                'stats_history': '/api/stats/history',
-                'stats_summary': '/api/stats/summary',
-                'logs': '/api/logs',
-            }
-        })
+    # Register routes
+    register_routes(app)
     
     return app
 
+
 if __name__ == '__main__':
     app = create_app()
+    app.run(host='127.0.0.1', port=8000, debug=app.config['DEBUG'])
     app.run(debug=True, host='127.0.0.1', port=8000)

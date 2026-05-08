@@ -107,10 +107,11 @@ graph TB
 | Layer | Technology | Why? |
 |-------|-----------|------|
 | **Frontend** | React + Vite + TypeScript | Fast, type-safe, modern |
-| **Backend** | Python + FastAPI | Lightweight, async, perfect for system tasks |
-| **Communication** | WebSockets | Real-time updates without polling |
-| **System Monitoring** | psutil | Cross-platform system stats |
-| **Theming** | CSS-in-JS (Emotion/Styled) | Seamless theme switching |
+| **Backend** | Python + Flask + SQLAlchemy | Lightweight, modular, easy to extend |
+| **Communication** | HTTP REST API | Simple, reliable, easy to debug |
+| **Database** | SQLite | File-based, zero setup required |
+| **System Monitoring** | psutil | Real-time CPU, RAM, Disk stats |
+| **Theming** | Emotion (CSS-in-JS) | Dynamic theme switching |
 | **State** | Zustand | Minimal, performant state management |
 
 ---
@@ -120,29 +121,34 @@ graph TB
 ### Prerequisites
 - **Node.js 18+** (for frontend)
 - **Python 3.9+** (for backend)
-- **Linux kernel** (no macOS/Windows support yet)
+- **Linux kernel** (primary support)
 
 ### Quick Start
 
+**Option 1: One-command startup (recommended)**
 ```bash
-# Clone the repository
-git clone https://github.com/BaraaByte/devdesk.git
 cd devdesk
-
-# Frontend setup
-cd frontend
-npm install
-npm run dev
-
-# Backend setup (in another terminal)
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python src/main.py
+chmod +x start.sh
+./start.sh
 ```
 
-The dashboard will be available at `http://localhost:5173`
+**Option 2: Manual setup**
+
+Frontend:
+```bash
+cd frontend
+npm install
+npm run dev  # Runs on http://localhost:5173
+```
+
+Backend (in another terminal):
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python app.py  # Runs on http://127.0.0.1:8000
+```
 
 ---
 

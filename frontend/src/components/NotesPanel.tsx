@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo, useCallback } from 'react'
 import styled from '@emotion/styled'
 import { useSystemStore } from '../store/systemStore'
+import { useDebounce } from '../hooks/useDebounce'
 
 const Container = styled.div<{ isDark: boolean }>`
   background: ${props => props.isDark ? 'rgba(30, 30, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
@@ -138,7 +139,7 @@ interface NotesPanelProps {
   isDark: boolean
 }
 
-export default function NotesPanel({ isDark }: NotesPanelProps) {
+const NotesPanel = memo(function NotesPanel({ isDark }: NotesPanelProps) {
   const notes = useSystemStore((state) => state.notes)
   const fetchNotes = useSystemStore((state) => state.fetchNotes)
   const saveNote = useSystemStore((state) => state.saveNote)
@@ -150,16 +151,18 @@ export default function NotesPanel({ isDark }: NotesPanelProps) {
     fetchNotes()
   }, [fetchNotes])
 
-  const handleAdd = async () => {
+  const handleAdd = useCallback(async () => {
     if (input.trim()) {
       await saveNote(input.trim())
       setInput('')
     }
-  }
+  }, [input, saveNote])
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     await deleteNote(id)
-  }
+  }, [deleteNote])
+
+  const debouncedHandleAdd = useDebounce(handleAdd, 300)
 
   return (
     <Container isDark={isDark}>
@@ -191,4 +194,6 @@ export default function NotesPanel({ isDark }: NotesPanelProps) {
       )}
     </Container>
   )
-}
+})
+
+export default NotesPanel

@@ -3,8 +3,8 @@
 ## Project Architecture Overview
 
 ```
-Frontend (React) ←→ WebSocket ←→ Backend (FastAPI) ← → System APIs
-     Vite               Real-time          psutil
+Frontend (React) ←→ REST API ←→ Backend (Flask) ← → System APIs
+     Vite               Polling           psutil
   TypeScript          Updates           Linux APIs
   Emotion CSS                          GitHub API
 ```
@@ -86,10 +86,10 @@ UI update
 ### Backend
 | Tech | Why | Alternative |
 |------|-----|-------------|
-| FastAPI | Modern, async, automatic docs | Flask, Django |
+| Flask | Lightweight, familiar, easy to extend | FastAPI, Django |
 | psutil | Cross-platform system info | Reading /proc directly |
-| Pydantic | Data validation, serialization | Dataclasses, schemas |
-| WebSockets | Real-time updates | Server-sent events, polling |
+| SQLAlchemy | ORM for SQLite storage | Raw SQL, Peewee |
+| Polling | Simple, reliable backend updates | WebSockets, SSE |
 
 ## Performance Considerations
 
@@ -146,7 +146,7 @@ npm run test  # Jest + React Testing Library
 
 ### Backend
 ```bash
-pytest tests/  # pytest with FastAPI TestClient
+pytest tests/  # pytest backend suite
 ```
 
 ## Deployment
@@ -154,7 +154,7 @@ pytest tests/  # pytest with FastAPI TestClient
 ### Development
 ```bash
 # Terminal 1 - Backend
-cd backend && python src/main.py
+cd backend && python app.py
 
 # Terminal 2 - Frontend  
 cd frontend && npm run dev
@@ -163,7 +163,7 @@ cd frontend && npm run dev
 ### Production
 ```bash
 # Backend
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.main:app
+gunicorn -w 4 app:app
 
 # Frontend
 npm run build  # Creates dist/ folder
@@ -178,10 +178,9 @@ npm run build  # Creates dist/ folder
 - Zustand DevTools for state inspection
 
 ### Backend
-- FastAPI auto-docs at `/docs` (Swagger UI)
-- Alt docs at `/redoc` (ReDoc)
+- Flask development server logs
 - Python debugger: `import pdb; pdb.set_trace()`
-- Uvicorn logs with `--log-level debug`
+- Use `flask shell` or `python app.py` for debugging
 
 ## File Organization
 
@@ -194,8 +193,8 @@ npm run build  # Creates dist/ folder
 
 2. **Backend Endpoint**
    ```
-   src/new_module.py
-   Update src/main.py with @app.get() or @websocket
+   backend/new_module.py
+   Update backend/app.py or backend/routes.py with @app.route()
    ```
 
 3. **Type Safety**

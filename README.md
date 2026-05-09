@@ -75,7 +75,7 @@ graph TB
     end
     
     subgraph Backend["Backend Layer (Python)"]
-        FastAPI["FastAPI Server"]
+        Flask["Flask Server"]
         Monitor["System Monitor<br/>psutil"]
         GitHub["GitHub API Client"]
     end
@@ -86,14 +86,14 @@ graph TB
         GitHub_API["GitHub API"]
     end
     
-    UI -->|WebSocket| FastAPI
+    UI -->|REST API| Flask
     State -->|Reads| UI
     Theming -->|Styles| UI
-    FastAPI -->|Returns Data| Monitor
-    FastAPI -->|Fetches| GitHub
+    Flask -->|Returns Data| Monitor
+    Flask -->|Fetches| GitHub
     Monitor -->|Reads| ProcFS
     GitHub -->|Queries| GitHub_API
-    FastAPI -->|Controls| DBus
+    Flask -->|Controls| DBus
     
     style Frontend fill:#61dafb,stroke:#333,color:#000
     style Backend fill:#3776ab,stroke:#333,color:#fff
@@ -176,14 +176,14 @@ devdesk/
 │   ├── vite.config.ts
 │   └── index.html
 │
-├── backend/                     # Python FastAPI backend
-│   ├── src/
-│   │   ├── main.py            # FastAPI app entry point
-│   │   ├── monitor.py         # CPU/RAM monitoring
-│   │   ├── github_client.py   # GitHub API integration
-│   │   └── plugins/           # Plugin system
+├── backend/                     # Python Flask backend
+│   ├── app.py                  # Flask app entry point
+│   ├── models.py               # Database models
+│   ├── routes.py               # API route definitions
+│   ├── config.py               # Configuration and CORS settings
+│   ├── utils.py                # System monitoring helpers
 │   ├── requirements.txt        # Python dependencies
-│   └── .env.example           # Environment template
+│   └── .env.example            # Environment template
 │
 ├── plugins/                     # Community & custom plugins
 │   ├── template.py            # Plugin boilerplate
@@ -212,7 +212,7 @@ Building DevDesk teaches:
 - State management at scale
 
 ✅ **Backend Development**
-- FastAPI async patterns
+- Flask patterns
 - WebSocket servers
 - External API integration (GitHub, system APIs)
 - Error handling & validation

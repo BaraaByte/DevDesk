@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, memo } from 'react'
 import styled from '@emotion/styled'
 import { useSystemStore } from '../store/systemStore'
 
@@ -60,14 +60,14 @@ interface CPUMonitorProps {
   isDark: boolean
 }
 
-export default function CPUMonitor({ isDark }: CPUMonitorProps) {
+const CPUMonitor = memo(function CPUMonitor({ isDark }: CPUMonitorProps) {
   const stats = useSystemStore((state) => state.stats)
   const fetchStats = useSystemStore((state) => state.fetchStats)
 
   // Fetch real stats on mount and periodically
   useEffect(() => {
     fetchStats()
-    const interval = setInterval(fetchStats, 2000)
+    const interval = setInterval(fetchStats, 5000)
     return () => clearInterval(interval)
   }, [fetchStats])
 
@@ -88,4 +88,6 @@ export default function CPUMonitor({ isDark }: CPUMonitorProps) {
       </Status>
     </Container>
   )
-}
+})
+
+export default CPUMonitor

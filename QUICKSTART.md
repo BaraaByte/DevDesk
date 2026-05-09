@@ -26,7 +26,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Start backend server
-python src/main.py
+python app.py
 ```
 
 Backend will be available at: `http://localhost:8000`
@@ -107,8 +107,7 @@ npm run type-check  # Check TypeScript
 
 ### Backend
 ```bash
-python src/main.py              # Run with auto-reload
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.main:app  # Production
+python app.py              # Run backend server
 ```
 
 ---
@@ -124,7 +123,7 @@ lsof -i :8000
 kill -9 <PID>
 
 # Or use a different port
-PORT=8001 python src/main.py
+PORT=8001 python app.py
 ```
 
 ### "Port 5173 already in use"
@@ -159,11 +158,12 @@ devdesk/
 │   │   └── App.tsx
 │   ├── package.json
 │   └── vite.config.ts
-├── backend/            # FastAPI server
-│   ├── src/
-│   │   ├── main.py      # FastAPI app
-│   │   ├── monitor.py   # System monitoring
-│   │   └── models.py    # Pydantic models
+├── backend/            # Flask server
+│   ├── app.py           # Flask app entry point
+│   ├── models.py        # Database models and ORM
+│   ├── routes.py        # API route definitions
+│   ├── config.py        # Configuration and CORS settings
+│   ├── utils.py         # System monitoring helpers
 │   └── requirements.txt
 ├── plugins/            # Plugin examples
 ├── screenshots/        # App screenshots

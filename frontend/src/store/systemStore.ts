@@ -1,5 +1,9 @@
 import { create } from 'zustand'
 
+// Cache for API responses to reduce redundant requests
+const apiCache = new Map<string, { data: any; timestamp: number }>()
+const CACHE_DURATION = 30000 // 30 seconds
+
 interface SystemStats {
   cpu: number
   ram: number
@@ -37,6 +41,19 @@ const API_BASE = 'http://127.0.0.1:8000'
 
 // API functions
 const apiRequest = async (endpoint: string, options?: RequestInit) => {
+  // Only cache GET requests
+  const isGetRequest = !options || !options.method || options.method === 'GET'
+  const cacheKey = `${endpoint}`
+  
+  if (isGetRequest) {
+    const cached = apiCache.get(cacheKey)
+    const now = Date.now()
+    
+    if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+      return cached.data
+    }
+  }
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
@@ -48,7 +65,14 @@ const apiRequest = async (endpoint: string, options?: RequestInit) => {
     throw new Error(`API request failed: ${response.status}`)
   }
 
-  return response.json()
+  const data = await response.json()
+  
+  // Cache GET requests
+  if (isGetRequest) {
+    apiCache.set(cacheKey, { data, timestamp: Date.now() })
+  }
+
+  return data
 }
 
 export const useSystemStore = create<SystemStore>((set, get) => ({
@@ -98,6 +122,8 @@ export const useSystemStore = create<SystemStore>((set, get) => ({
         method: 'POST',
         body: JSON.stringify({ text }),
       })
+      // Invalidate cache after successful POST
+      apiCache.delete('/api/notes')
       set((state) => ({ notes: [newNote, ...state.notes], loading: false }))
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to save note', loading: false })
@@ -110,6 +136,8 @@ export const useSystemStore = create<SystemStore>((set, get) => ({
       await apiRequest(`/api/notes/${id}`, {
         method: 'DELETE',
       })
+      // Invalidate cache after successful DELETE
+      apiCache.delete('/api/notes')
       set((state) => ({
         notes: state.notes.filter((note) => note.id !== id),
         loading: false

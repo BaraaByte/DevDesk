@@ -5,6 +5,7 @@ from flask_cors import CORS
 from config import config, CONFIG_MAP
 from models import db
 from routes import register_routes
+from middleware import PerformanceMiddleware
 
 
 def create_app(config_name=None):
@@ -33,6 +34,9 @@ def create_app(config_name=None):
     # Setup CORS
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
+    # Initialize performance monitoring
+    PerformanceMiddleware(app)
+    
     # Create database tables
     with app.app_context():
         db.create_all()
@@ -46,4 +50,3 @@ def create_app(config_name=None):
 if __name__ == '__main__':
     app = create_app()
     app.run(host='127.0.0.1', port=8000, debug=app.config['DEBUG'])
-    app.run(debug=True, host='127.0.0.1', port=8000)
